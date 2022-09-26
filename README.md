@@ -1,1 +1,3 @@
-# aws-ssa-co2-exam-notes
+# AWS Solutions Architect
+
+[IAM, Accounts and AWS Organisations](/section-A)
