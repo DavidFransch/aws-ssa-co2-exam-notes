@@ -87,3 +87,38 @@ Example:
   - Provide SSO for employees to use an AWS service (Active Directory -> Role -> s3)
   - App  1,000,000's of users (Web identity (i.e. Facebook) -> Role -> DynamoDB)
 - AWS account with 1000s of identities -> role -> s3
+
+## AWS Organisations
+- Management account used to create organisation and contains payment method
+- Root account (structure)
+- Consolidated billing - removes financial overhead
+- Consolidation of reservations and volume accounts
+- Creating a new account is a single step
+- Inviting an existing account needs confirmation
+
+## Service Control Policies (SCP)
+- **Policy document** (JSON) which can be attached to:
+  -  root container or
+  -  one or more organisation units or
+  -  one or more accounts
+- Management account is unaffected by SCP
+- SCPs are **account permissions boudaries**
+- They limit what the account (**including the account root user**) can do
+- **DON'T grant permissions**
+- Default = FullAWSAccess (hence SCPs are **deny list architecture**)
+- Implementing allow lists -> remove FullAWSAccess -> AllowS3EC2 (more admin overhead)
+- If allowed by SCP still **requires Identity Policy**
+
+## CloudWatch Logs
+- Store, monitor and access logging data
+- Public service and can also be utilised in an on-premises environment and even from other public cloud platforms.
+- AWS integrations - EC2, VPC Flow Logs, Lamda, CloudTrail, R53 and more.
+- Can generate metrics based on logs - metric filter
+
+## CloudTrail
+- Logs **API** calls/activities as a **CloudTrail Event**
+- 90 days stored by default in **Event History**
+- Enabled **by default** - no cost for **90 day** history
+- To customise the service .. create 1 or more Trails
+  - **TRAILS** are how you configure S3 and CWLogs
+- **Management** Events and Data Events (not enabled by default and extra cost)
