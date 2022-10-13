@@ -122,3 +122,119 @@ Example:
 - To customise the service .. create 1 or more Trails
   - **TRAILS** are how you configure S3 and CWLogs
 - **Management** Events and Data Events (not enabled by default and extra cost)
+- **Regional** service
+  - One region trail
+  - All region trail
+- IAM, STS, CLoudFront => Global Service Events
+- **NOT REALTIME** - There is a delay (about 15min)
+
+## Simple Storage Service (S3)
+
+### S3 Security (Resource Policies & ACLs)
+- S3 is private by default (anyone **other than root user** needs permission)
+- S3 bucket policies
+  - A form of **resource policy**
+  - Like identity policies but attached to a bucket
+  - Resource perspective permissions
+  - ALLOW/DENY same or **different** accounts
+  - ALLOW/DENY **Anonymous** principals
+  - Usecase for bucket policies:
+    - Who can access objects
+- Access Control Lists (ACLs)
+  - ACLs on objects and bucket
+  - A subresource
+  - Legacy (recommended to not use)
+  - Inflexible & Simple permissions (can't write objects)
+- Block public access (apply to anonymous principal)
+
+Example bucket policy:
+(**Principal** specfied -> way to identify that it's a bucket policy)
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicRead",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": ["s3:GetObject"],
+            "Resource": ["arn:aws:s3:::secretcatproject/*"]
+        }
+    ]
+}
+```
+
+Example: Blocks access if your IP is not 1.3.3.7/32
+```json
+{
+    "Version": "2012-10-17",
+    "Id": "BlockUnLeet",
+    "Statement": [
+        {
+            "Sid": "IPAllow",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": ["s3:*"],
+            "Resource": ["arn:aws:s3:::secretcatproject/*"],
+            "Condition": {
+                "NotIpAddress": {"aws:SourceIp": "1.3.3.7/32"}
+            }
+        }
+    ]
+}
+```
+
+Exam Powerup:
+- If you are managing **many different resources** across an AWS account, then **resources policies don't make sense** (not every service supports resource policies and one would need a policy for every service) RATHER USE **identity policy**
+- When managing on a **specific product** i.e. AWS S3 USE **bucket/resource policy**
+- **Never** use ACLs, unless you must
+
+### S3 Static Hosting
+- Normal access is via AWS API's
+- Feature allows access via HTTP - e.g Blogs..
+- Index and Error documents are set
+- Website Endpoint is created
+- Custom Domain via R53 - Bucketname Matters
+
+### Object Versioning and MFA
+Versioning let's you store **multiple versions** of objects within a bucket. Operations which would modify objects **generate a new version.**
+
+```
+Disabled -> Enabled -> Suspended ..
+
+Enabled <- Suspended
+```
+- **Enabled cannot go to disabled**
+- **Cannot be switched** off - only suspended
+- Space is consumed by ALL versions
+- Billed for ALL versions
+- Only way to 0 costs - is to delete the bucket
+- MFA Delete
+  - Enabled in **versioning configuration**
+  - MFA is required to **change** bucket **versioning state**
+  - MFA required to **delete versions**
+  - Serial number (MFA) + Code passed with API calls
+
+### S3 Performance Optimization
+- **Single PUT Upload** 
+  - Single data stream to S3
+  - Stream fails - upload fails
+  - Requires full restart
+  - Speed & reliability = limit of 1 stream
+  - Any upload up to **5GB**
+
+- **Multipart Upload**
+  - Data is broken up
+  - **Min** data size **100MB** for multipart
+  - **10,000 max parts**, 5MB -> 5GB
+  - Last part can be smaller than 5MB
+  - Parts can fail, and be restarted
+
+- **S3 Transfer Acceleration**
+  - Uses AWS **edge locations**
+  - Need to enable the S3 bucket (i.e. **default off**)
+  - Restrictions
+    - No periods in name
+    - DNS compatible
+  - Faster and lower consistent latency
+  - Can test with s3-accelerate-speedtest tool
